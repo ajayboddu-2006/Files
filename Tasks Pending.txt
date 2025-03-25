@@ -1,0 +1,10 @@
+1. Macro Hardening
+2. Lef integration
+3. Analog Vlsi course on nptel
+4. Analog layouts
+5. VSD Squadron FM internship
+6. RISC based MYTH internship
+7. ECG analysis on Hardware Accelerator
+8. Vitis IDE based AI Accelerator
+9. 30 Days of RTL Challenge
+10. Silicluster
