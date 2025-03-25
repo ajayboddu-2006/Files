@@ -1,0 +1,39 @@
+📂 RISC-V-MYTH-Workshop/
+│── 📜 README.md
+│── 📜 LICENSE
+│── 📜 .gitignore
+│── 📂 Docs/
+│   ├── 📜 Workshop_Overview.md
+│   ├── 📜 RISC-V_ISA.md
+│   ├── 📜 TL-Verilog_Basics.md
+│   ├── 📜 CPU_Design.md
+│── 📂 RISC-V_ISA/
+│   ├── 📜 Instructions.md
+│   ├── 📂 Example_Codes/
+│   │   ├── 📜 add.s
+│   │   ├── 📜 branch.s
+│   │   ├── 📜 load_store.s
+│── 📂 TL-Verilog/
+│   ├── 📜 Basics.md
+│   ├── 📂 Example_Codes/
+│   │   ├── 📜 mux_4x1.tlv
+│   │   ├── 📜 alu.tlv
+│   │   ├── 📜 program_counter.tlv
+│── 📂 CPU_Design/
+│   ├── 📜 Design_Specs.md
+│   ├── 📜 Pipeline_Stages.md
+│   ├── 📜 Testing.md
+│   ├── 📂 Code/
+│   │   ├── 📜 riscv_cpu.tlv
+│── 📂 Simulations/
+│   ├── 📜 Testbenches.md
+│   ├── 📜 Results.md
+│── 📂 Tools/
+│   ├── 📜 Makerchip.md
+│   ├── 📜 Verilator_Setup.md
+│── 📂 Extras/
+│   ├── 📜 Useful_Links.md
+│   ├── 📜 References.md
+│── 📂 Images/
+│   ├── 📜 pipeline_diagram.png
+│   ├── 📜 cpu_architecture.png
