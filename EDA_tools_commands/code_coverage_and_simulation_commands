@@ -1,0 +1,6 @@
+Code-coverage commands:
+covered score -t nand_test -v nand_gate_tb.v -v nand_gate.v -vcd nand_test.vcd -o nand_gate.cdd
+covered report -d v nand_gate.cdd
+
+Simulation commmands:
+iverilog -o mysim ajay.v ajay_tb.v
