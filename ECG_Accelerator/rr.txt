@@ -1,0 +1,147 @@
+module RR_Interval_Calculator (
+    input clk,
+    input rst_n,
+    input peak_detected, // Input signal with peaks
+    output reg [15:0] avg_interval, // Average interval of first N peaks
+    output reg output_valid, // Flag to indicate output validity
+    output reg [15:0] current_time,
+    output reg [15:0] sum_intervals,
+    output reg [3:0] index,
+    output reg [15:0] current_interval
+);
+
+    // Parameters
+    parameter NUM_PEAKS = 4; // Number of peaks to average over
+
+    // Internal signals
+    reg [15:0] prev_time; // Buffer to store time intervals
+    reg calibration_done; // Flag to indicate completion of initial calibration
+    reg prev_peak_detected; // Register to store the previous state of peak_detected
+    wire peak_rising_edge; // Signal to indicate rising edge of peak_detected
+
+    // Rising edge detection
+    assign peak_rising_edge = peak_detected && !prev_peak_detected;
+
+    // Initialize buffer and counters
+    integer i;
+
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            prev_time <= 16'd0;  // Keep prev_time at 0 initially
+            current_time <= 16'd0;
+            index <= 4'd0;
+            sum_intervals <= 16'd0;
+            avg_interval <= 16'd0;
+            calibration_done <= 1'b0;
+            output_valid <= 1'b0;
+            prev_peak_detected <= 1'b0; // Initialize previous peak_detected state
+        end 
+        else begin
+            // Store the current state of peak_detected for the next clock cycle
+            prev_peak_detected <= peak_detected;
+
+            if (peak_rising_edge) begin
+                if (prev_time == 16'd0) begin
+                    // Ignore first peak and set prev_time without calculating interval
+                    prev_time <= current_time;
+                end 
+                else begin
+                    // Calculate the current interval from the second peak onward
+		    current_interval <= current_time - prev_time;
+                    sum_intervals <= sum_intervals + (current_time - prev_time);
+                    prev_time <= current_time;
+
+                    // If calibration is not done, store the interval and update the sum
+                    if (!calibration_done) begin
+                        // Increment the index
+                        if (index == NUM_PEAKS) begin
+                            // Calculate the average interval
+				//sum_intervals <= sum_intervals + (current_time - prev_time);
+                            avg_interval <= sum_intervals / (NUM_PEAKS);
+
+                            // Set calibration as complete
+                            calibration_done <= 1'b1;
+                            output_valid <= 1'b1; // Output is now valid
+                        end else begin
+                            index <= index + 1;
+                        end
+                    end
+		//sum_intervals <= sum_intervals + (current_time - prev_time);
+		//sum_intervals <= sum_intervals + (current_interval);
+                end
+            end 
+            else begin
+                // Increment the current time counter
+                current_time <= current_time + 1;
+            end
+        end
+    end
+endmodule
+
+
+
+
+
+
+
+
+
+
+
+module RR_Interval_Calculator (
+    input clk,
+    input rst_n,
+    input peak_detected, 
+    output reg [15:0] avg_interval, 
+    output reg output_valid,
+    output reg [15:0] current_time,
+    output reg [15:0] sum_intervals,
+    output reg [3:0] index,
+    output reg [15:0] current_interval
+);
+    parameter NUM_PEAKS = 2; 
+    reg [15:0] prev_time; 
+    reg calibration_done; 
+    reg prev_peak_detected; 
+    wire peak_rising_edge; 
+    assign peak_rising_edge = peak_detected && !prev_peak_detected;
+    integer i;
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            prev_time = 16'd0;  
+            current_time = 16'd0;
+            index = 4'd0;
+            sum_intervals = 16'd0;
+            avg_interval = 16'd0;
+            calibration_done = 1'b0;
+            output_valid = 1'b0;
+            prev_peak_detected = 1'b0;
+        end 
+        else begin
+            prev_peak_detected = peak_detected;
+            if (peak_rising_edge) begin
+                if (prev_time == 16'd0) begin
+                    prev_time = current_time;
+                end 
+                else begin
+		    current_interval = current_time - prev_time;
+                    sum_intervals = sum_intervals + (current_time - prev_time);
+                    prev_time = current_time;
+                    if (!calibration_done) begin
+                        if (index == NUM_PEAKS-1) begin
+                            avg_interval = sum_intervals / (NUM_PEAKS);
+                            calibration_done = 1'b1;
+                            output_valid = 1'b1; 
+                        end else begin
+                            index = index + 1;
+                        end
+                    end
+                end
+            end 
+            else begin
+                current_time = current_time + 1;
+            end
+        end
+    end
+endmodule
+

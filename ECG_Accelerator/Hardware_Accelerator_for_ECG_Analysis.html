@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HLS-Based 1-D CNN Accelerator for ECG Analysis & Heart Rate Estimation</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 40px; padding: 20px; background-color:
+#f4f4f4; }
+h1, h2, h3 { color: #333; }
+section { background: white; padding: 20px; margin: 20px 0; border-radius: 8px;
+box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+pre { background: #eee; padding: 10px; border-radius: 5px; white-space: pre-wrap; }
+ul { margin: 10px 0; padding-left: 20px; }
+li { margin: 5px 0; }
+footer { text-align: center; margin-top: 40px; font-style: italic; color: #666; }
+.note { background: #ffffcc; padding: 10px; border-left: 4px solid #ffeb3b; margin: 10px 0; }
+</style>
+</head>
+<body>
+<h1>HLS-Based 1-D CNN Accelerator for ECG Analysis & Heart Rate Estimation</h1>
+<p>This guide provides a comprehensive step-by-step approach for designing an
+FPGA-based 1-D CNN Accelerator using High-Level Synthesis (HLS) with C/C++. It covers
+everything from dataset selection to final deployment and optimization.</p>
+<section>
+<h2>Step 1: Understanding the Project Scope</h2>
+<p>The goal is to design an FPGA-based hardware accelerator for processing ECG
+signals. It performs two tasks:</p>
+<ul>
+<li><strong>ECG Analysis:</strong> Using a 1-D CNN to classify heart diseases such
+as arrhythmia, myocardial infarction, and more.</li>
+<li><strong>Heart Rate Estimation:</strong> Detecting R-peaks in the ECG waveform
+and calculating the heart rate in real-time.</li>
+</ul>
+<p><strong>Why HLS?</strong> HLS allows you to write high-level C/C++ code, which is
+automatically synthesized into hardware description language (HDL), significantly speeding up
+development and reducing the complexity of traditional HDL coding.</p>
+</section>
+<section>
+<h2>Step 2: Dataset Selection and Preprocessing</h2>
+<p>Use the <strong>Chapman ECG Database</strong> for training the CNN model. This
+dataset contains 12-lead ECG recordings labeled with various heart conditions.</p>
+<p><strong>Preprocessing Steps:</strong></p>
+<ul>
+<li><strong>Normalization:</strong> Scale ECG signals to a standard range (e.g., 0 to
+1).</li>
+<li><strong>Segmentation:</strong> Split ECG signals into fixed-length windows (e.g.,
+5-second segments).</li>
+<li><strong>Noise Removal:</strong> Apply filters (e.g., bandpass or notch filters) to
+remove noise.</li>
+</ul>
+<p><strong>Example:</strong> Preprocessing in Python:</p>
+<pre>import numpy as np
+from scipy.signal import butter, filtfilt
+# Normalize ECG data
+ecg_data = (ecg_data - np.mean(ecg_data)) / np.std(ecg_data)
+# Apply bandpass filter
+def bandpass_filter(data, lowcut, highcut, fs, order=5):
+nyquist = 0.5 * fs
+low = lowcut / nyquist
+high = highcut / nyquist
+b, a = butter(order, [low, high], btype='band')
+return filtfilt(b, a, data)
+filtered_ecg = bandpass_filter(ecg_data, 0.5, 40, 500)</pre>
+</section>
+<section>
+<h2>Step 3: CNN Design in C/C++</h2>
+<p>Design the CNN in C/C++ using HLS-compatible libraries. The CNN should include the
+following layers:</p>
+<ul>
+<li><strong>Convolutional Layer:</strong> Perform feature extraction using 1-D
+convolution.</li>
+<li><strong>Activation Function (ReLU):</strong> Introduce non-linearity to the
+model.</li>
+<li><strong>Pooling Layer (Max Pooling):</strong> Reduce dimensionality while
+retaining important features.</li>
+<li><strong>Fully Connected Layer:</strong> Combine features for classification.</li>
+</ul>
+<p><strong>Example:</strong> 1-D Convolutional Layer in C++:</p>
+<pre>#include <ap_int.h>
+void conv1d(ap_int<16> input_data[100], ap_int<16> output_data[100], ap_int<16> kernel[3]) {
+#pragma HLS PIPELINE
+for (int i = 0; i < 98; i++) {
+output_data[i] = input_data[i] * kernel[0] + input_data[i+1] * kernel[1] + input_data[i+2] *
+kernel[2];
+}
+}</pre>
+<p><strong>HLS Pragmas:</strong> Use pragmas to optimize the design:</p>
+<ul>
+<li><code>#pragma HLS PIPELINE</code>: Improves throughput by overlapping
+operations.</li>
+<li><code>#pragma HLS UNROLL</code>: Unrolls loops for parallel execution.</li>
+</ul>
+</section>
+<section>
+<h2>Step 4: Training the Model</h2>
+<p>Train the CNN in Python using TensorFlow/PyTorch. Extract the trained weights and
+quantize them for FPGA implementation.</p>
+<p><strong>Example:</strong> Weight Extraction and Quantization:</p>
+<pre>import tensorflow as tf
+import numpy as np
+# Extract weights
+weights = trained_model.get_weights()
+# Quantize weights to 16-bit fixed-point
+quantized_weights = [np.round(w * 256).astype(np.int16) for w in weights]</pre>
+</section>
+<section>
+<h2>Step 5: HLS Synthesis</h2>
+<p>Use HLS tools like Xilinx Vivado HLS or Intel HLS to synthesize the C/C++ code into
+HDL. Follow these steps:</p>
+<ol>
+<li>Write the CNN logic in C/C++.</li>
+<li>Add HLS pragmas for optimization.</li>
+<li>Synthesize the code to generate HDL.</li>
+</ol>
+<p><strong>Example:</strong> Adding HLS Pragmas:</p>
+<pre>#pragma HLS PIPELINE
+#pragma HLS UNROLL</pre>
+</section>
+<section>
+<h2>Step 6: Hardware Implementation</h2>
+<p>Load the synthesized HDL onto the FPGA. Ensure the following:</p>
+<ul>
+<li>Weights are stored in FPGA memory (e.g., BRAM).</li>
+<li>Data movement between layers is optimized.</li>
+</ul>
+<p><strong>Tip:</strong> Use HLS-generated RTL for integration with the FPGA
+design.</p>
+</section>
+<section>
+<h2>Step 7: Heart Rate Estimation</h2>
+<p>Implement R-peak detection and heart rate calculation in C/C++. The heart rate can be
+calculated as:</p>
+<pre>Heart Rate (BPM) = 60 / (Average R-R Interval in seconds)</pre>
+<p><strong>Example:</strong> R-Peak Detection Logic:</p>
+<pre>if (ecg_signal > threshold) {
+r_peak_detected = 1;
+}</pre>
+</section>
+<section>
+<h2>Step 8: Testing & Validation</h2>
+<p>Test the design with ECG signals from the Chapman database. Validate the
+following:</p>
+<ul>
+<li>Disease classification accuracy.</li>
+<li>Heart rate estimation performance.</li>
+</ul>
+</section>
+<section>
+<h2>Step 9: Final Optimization</h2>
+<p>Optimize the design for resource utilization and real-time performance. Use HLS
+reports to identify and address bottlenecks.</p>
+</section>
+<footer>
+<p>By following these steps, you can successfully design an HLS-based 1-D CNN
+accelerator for ECG analysis and heart rate estimation. This methodology ensures rapid
+development and efficient hardware implementation.</p>
+</footer>
+</body>
+</html>
